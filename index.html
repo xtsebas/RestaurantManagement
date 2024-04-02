@@ -1,0 +1,112 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Management</title>
+    <style>
+        aside {
+            width: 200px; 
+            height: 100%;
+            background-color: #f4f4f4; 
+            padding: 20px; 
+            float: left;
+        }
+        main {
+            margin-left: 220px; 
+            padding: 20px;
+            background-color: #fff; 
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <ul>
+            <li onclick="showMain(0)">Mesas</li>
+            <li onclick="showMain(1)">Cocina</li>
+            <li onclick="showMain(2)">Bar</li>
+            <li onclick="showMain(3)">Reportes</li>
+        </ul>
+    </aside>
+
+    <main style="display: none;">
+        <header>
+            <h1>MESAS</h1>
+            <h2>USER</h2>
+        </header>
+        <nav>
+            <select name="area" id="area">
+                <option value="Terraza">Terraza</option>
+                <option value="Salon1">Salon 1</option>
+                <option value="Salon2">Salon 2</option>
+            </select>
+            <button>Juntar</button>
+            <button>Queja</button>
+        </nav>
+        <section id="mesas">
+            <button id="abrirmodal" onclick="abrirModal()">ACA VAN LAS MESAS</button>
+        </section>
+
+        <dialog id="modal">
+            Hola
+            <button id="cerrarmodal" onclick="cerrarModal()">cerrar</button>
+        </dialog>
+    </main>
+
+    <main style="display: none;">
+        <h1>COCINA</h1>
+        <table>
+            <thead>
+                <th>Nombre</th>
+                <th>Costo</th>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+    </main>
+
+    <main style="display: none;">
+        <h1>BAR</h1>
+        <table>
+            <thead>
+                <th>Nombre</th>
+                <th>Costo</th>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+    </main>
+
+    <main style="display: none;">
+        <h1>REPORTES</h1>
+        <table>
+            <tbody>
+                <tr>reporte 1</tr>    
+                <tr>reporte 2</tr>    
+                <tr>reporte 3</tr>    
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        function showMain(index) {
+            var mainElements = document.querySelectorAll('main');
+            for (var i = 0; i < mainElements.length; i++) {
+                mainElements[i].style.display = 'none';
+            }
+            mainElements[index].style.display = 'block';
+        }
+
+        function abrirModal() {
+            const modal = document.querySelector("#modal");
+            modal.showModal();
+        }
+
+        function cerrarModal() {
+            const modal = document.querySelector("#modal");
+            modal.close();
+        }
+    </script>
+</body>
+</html>
