@@ -16,6 +16,66 @@
             padding: 20px;
             background-color: #fff; 
         }
+
+        #mesas {
+        max-height: 500px; /* Altura máxima para activar la barra de desplazamiento */
+        overflow-y: auto; /* Desplazamiento vertical */
+        }
+        #area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 10px;
+            padding: 10px;
+        }
+        #area img {
+            width: 25%;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        font-family: Arial, sans-serif;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #ddd;
+        }
+
+        tbody tr {
+        background-color: #f8f8f8;
+        border-bottom: 2px solid #dddddd;
+        color: #555555;
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background-color: #eaeaea;
+        }
+
+        tbody tr td {
+            padding: 12px 8px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -42,8 +102,20 @@
             <button>Juntar</button>
             <button>Queja</button>
         </nav>
+
         <section id="mesas">
-            <button id="abrirmodal" onclick="abrirModal()">ACA VAN LAS MESAS</button>
+            <div id="area">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+                <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
+            </div>
         </section>
 
         <dialog id="modal">
@@ -57,7 +129,8 @@
         <table>
             <thead>
                 <th>Nombre</th>
-                <th>Costo</th>
+                <th>Descripcion</th>
+                <th>Precio</th>
             </thead>
             <tbody>
                 
@@ -70,7 +143,8 @@
         <table>
             <thead>
                 <th>Nombre</th>
-                <th>Costo</th>
+                <th>Descripcion</th>
+                <th>Precio</th>
             </thead>
             <tbody>
                 
@@ -82,18 +156,37 @@
         <h1>REPORTES</h1>
         <table>
             <tbody>
-                <tr>reporte 1</tr>    
-                <tr>reporte 2</tr>    
-                <tr>reporte 3</tr>    
+                <tr onclick="abrirModal()">
+                    <td>reporte 1</td>    
+                </tr>
+                <tr onclick="abrirModal()">
+                    <td>reporte 2</td>    
+                </tr>
+                <tr onclick="abrirModal()">
+                    <td>reporte 3</td>    
+                </tr>
+                <tr onclick="abrirModal()">
+                    <td>reporte 4</td>    
+                </tr>
+                <tr onclick="abrirModal()">
+                    <td>reporte 5</td>    
+                </tr>
+                <tr onclick="abrirModal()">
+                    <td>reporte 6</td>    
+                </tr>
             </tbody>
         </table>
+        <dialog id="modal">
+            Hola
+            <button id="cerrarmodal" onclick="cerrarModal()">cerrar</button>
+        </dialog>
     </main>
 
     <script>
-        if (!sessionStorage.getItem('isLoggedIn')) {
+        /*if (!sessionStorage.getItem('isLoggedIn')) {
             // Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
             window.location.href = 'login.html';
-        }
+        }*/
 
         function showMain(index) {
             var mainElements = document.querySelectorAll('main');
