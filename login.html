@@ -30,7 +30,7 @@
 
     }
 
-    #inputStyle{
+    .inputStyle{
         height: 30px;
         width: 300px;
         margin: 10px;
@@ -50,7 +50,7 @@
 
     }
     
-  
+
     </style>
 </head>
 <body>
@@ -59,16 +59,40 @@
     <h1>Log in</h1>
     <form class="form-login">
         <div class="form-group">
-            <input id="inputStyle" type="text" id="username" name="username" placeholder="Usuario" required>
+            <input class="inputStyle" type="text" id="username" name="username" placeholder="Usuario" required>
         </div>
         <div class="form-group">
-            <input id="inputStyle" type="password" id="password" name="password" placeholder="Contraseña" required>
+            <input class="inputStyle" type="password" id="password" name="password" placeholder="Contraseña" required>
         </div>
         <div class="form-group">
-            <button id="buttoStyle" type="submit">Iniciar sesi ón</button>
+            <button id="buttoStyle" type="submit" onclick="viajar()">Iniciar sesión</button>
         </div>
     </form>  
 </div>
+
+<script src="./src/db.js" type="module"></script>
+
+<script>
+    import checkUserPassword from "./src/db.js";
+    async function viajar(){
+        event.preventDefault(); // Evitar el envío del formulario
+        
+        // Obtener los valores de usuario y contraseña
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+    
+        const result = await checkUserPassword(username, password);
+
+        if (result.success) {
+            // Credenciales válidas, redirigir al usuario a la página de índice
+            sessionStorage.setItem('isLoggedIn', true);
+            window.location.href = 'index.html';
+        } else {
+            // Credenciales inválidas, mostrar mensaje de error
+            alert('Nombre de usuario o contraseña incorrectos. Por favor, inténtelo de nuevo.');
+        }
+    }
+</script>
 
 </body>
 </html>

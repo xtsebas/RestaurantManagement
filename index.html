@@ -21,10 +21,10 @@
 <body>
     <aside>
         <ul>
-            <li onclick="showMain(0)">Mesas</li>
-            <li onclick="showMain(1)">Cocina</li>
-            <li onclick="showMain(2)">Bar</li>
-            <li onclick="showMain(3)">Reportes</li>
+            <li onclick="showMain(0)"> <a href="#">Mesas</a></li>
+            <li onclick="showMain(1)"> <a href="#">Cocina</a></li>
+            <li onclick="showMain(2)"> <a href="#">Bar</a></li>
+            <li onclick="showMain(3)"> <a href="#">Reportes</a></li>
         </ul>
     </aside>
 
@@ -90,6 +90,11 @@
     </main>
 
     <script>
+        if (!sessionStorage.getItem('isLoggedIn')) {
+            // Si el usuario no ha iniciado sesión, redirigir a la página de inicio de sesión
+            window.location.href = 'login.html';
+        }
+
         function showMain(index) {
             var mainElements = document.querySelectorAll('main');
             for (var i = 0; i < mainElements.length; i++) {

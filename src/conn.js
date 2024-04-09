@@ -12,14 +12,4 @@ const pool = new Pool({
   }
 });
 
-// Ejemplo de consulta a la base de datos
-pool.query('SELECT * FROM items', (err, res) => {
-  if (err) {
-    console.error('Error en la consulta:', err);
-  } else {
-    console.log('Resultado de la consulta:', res.rows[0]);
-  }
-  
-  // Cierra la conexión después de usarla
-  pool.end();
-});
+export default pool;
