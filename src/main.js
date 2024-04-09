@@ -1,6 +1,6 @@
 import { getAllItems, getEmployees } from './db.js';
 
-const loginForm = document.getElementById('loginForm');
+const loginForm = document.getElementById('form-login');
 
 loginForm.addEventListener('submit', async (event) => {
     event.preventDefault(); // Evitar que el formulario se envíe automáticamente
