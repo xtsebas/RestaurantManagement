@@ -1,8 +1,8 @@
 import pkg from 'pg';
-const { Client } = pkg;
+const { Pool } = pkg;
 
 // Configura la conexión a tu base de datos PostgreSQL
-const pool = new Client({
+const pool = new Pool({
   user: 'u9h73gvdn3nqqq',
   host: 'c7gljno857ucsl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com',
   database: 'dbqa0v50s9e961',

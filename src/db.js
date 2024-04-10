@@ -27,5 +27,4 @@ async function getEmployees(name, password) {
     }
 }
 
-getEmployees('Laura Fernandez', 'contrasena_laura');
 export {getAllItems, getEmployees};

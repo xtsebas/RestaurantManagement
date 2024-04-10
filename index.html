@@ -11,6 +11,29 @@
             padding: 20px; 
             float: left;
         }
+        ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        li a {
+            text-decoration: none;
+            color: #000000;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        li a:hover {
+            color: #ffd700; /* Cambia el color al pasar el mouse sobre los enlaces */
+        }
+        .welcome-container {
+            text-align: center;
+        }
         main {
             margin-left: 220px; 
             padding: 20px;
@@ -76,17 +99,66 @@
             padding: 12px 8px;
             text-align: left;
         }
+
+        select {
+        padding: 8px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        background-color: #f8f8f8;
+        }
+        
+        /* Estilos para los botones */
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* Estilo para los botones al pasar el ratón sobre ellos */
+        button:hover {
+            background-color: #0056b3;
+        }
+        nav{
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 5px;
+        }
+        header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        }
+
+        h1, h2 {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <aside>
         <ul>
-            <li onclick="showMain(0)"> <a href="#">Mesas</a></li>
-            <li onclick="showMain(1)"> <a href="#">Cocina</a></li>
-            <li onclick="showMain(2)"> <a href="#">Bar</a></li>
-            <li onclick="showMain(3)"> <a href="#">Reportes</a></li>
+            <li onclick="showMain(1)"> <a href="#">Mesas</a></li>
+            <li onclick="showMain(2)"> <a href="#">Cocina</a></li>
+            <li onclick="showMain(3)"> <a href="#">Bar</a></li>
+            <li onclick="showMain(4)"> <a href="#">Reportes</a></li>
         </ul>
     </aside>
+
+    <main>
+        <div class="welcome-container">
+            <h1>Bienvenido</h1>
+            <p>Gracias por visitarnos. Disfruta de nuestra aplicación.</p>
+            <h1>Lista de Items</h1>
+            <div id="items-container"></div>
+        </div>
+    </main>
 
     <main style="display: none;">
         <header>
@@ -102,7 +174,7 @@
             <button>Juntar</button>
             <button>Queja</button>
         </nav>
-
+        <hr>
         <section id="mesas">
             <div id="area">
                 <img src="./mesas.png" style="width: 25%;" onclick="abrirModal()">
@@ -181,6 +253,8 @@
             <button id="cerrarmodal" onclick="cerrarModal()">cerrar</button>
         </dialog>
     </main>
+
+    <script src="./src/main.js"></script>
 
     <script>
         /*if (!sessionStorage.getItem('isLoggedIn')) {

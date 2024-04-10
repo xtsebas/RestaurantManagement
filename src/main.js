@@ -1,22 +1,29 @@
-import { getAllItems, getEmployees } from './db.js';
-
-const loginForm = document.getElementById('loginForm');
-
-loginForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); // Evitar que el formulario se envíe automáticamente
-
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
+async function getItems() {
     try {
-        const employees = await getEmployees(username, password);
-        console.log('Usuario y contraseña correctos. Datos del empleado:', employees);
-        // Aquí puedes redirigir al usuario a otra página o realizar otras acciones
-        sessionStorage.setItem('isLoggedIn', true);
-        window.location.href = 'index.html';
+        const response = await fetch('http://localhost:3000/items'); // Cambia la URL si tu servidor está en un puerto diferente
+        const items = await response.json();
+        return items;
     } catch (error) {
-        console.error('Error al iniciar sesión:', error.message);
-        // Aquí puedes mostrar un mensaje de error al usuario en el formulario
+        console.error('Error fetching items:', error);
+        return [];
     }
-});
+}
 
+// Función para mostrar los items en el HTML
+async function renderItems() {
+    const itemsContainer = document.getElementById('items-container');
+    const items = await getItems();
+
+    // Limpiar el contenedor de items
+    itemsContainer.innerHTML = '';
+
+    // Agregar cada item al contenedor
+    items.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.textContent = `${item.name} - ${item.price}`;
+        itemsContainer.appendChild(itemElement);
+    });
+}
+
+// Llamar a la función para renderizar los items cuando se cargue la página
+window.onload = renderItems;
