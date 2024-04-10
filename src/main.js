@@ -18,4 +18,5 @@ loginForm.addEventListener('submit', async (event) => {
         console.error('Error al iniciar sesión:', error.message);
         // Aquí puedes mostrar un mensaje de error al usuario en el formulario
     }
-};
+});
+
