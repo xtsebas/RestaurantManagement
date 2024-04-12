@@ -1,6 +1,56 @@
 from db_test1 import *
 from tabulate import tabulate
 import os
+from controller import *
+
+def ordernar():
+    return None
+
+def abrirCuenta():
+    return None
+
+def cerrarCuenta():
+    return None
+
+def opcionesMesa():
+    print("Acciones con la mesa")
+    print("1. Abrir cuenta")
+    print("2. Cerrar cuenta/generar factura")
+    print("3. Ordenar")
+    print("4. Regresar")
+
+    opcionMesa = str(input("Ingresa accion con la mesa: "))
+
+    if opcionesMesa == "1":
+        abrirCuenta()
+    elif opcionesMesa == "2":
+        cerrarCuenta()
+    elif opcionesMesa == "3":
+        ordernar()
+    elif opcionesMesa == "4":
+        pass
+
+    return None 
+
+def accionMesa(area,connection):
+    print("\nUsted Puede realizar:")
+    print("1. Seleccionar mesa")    
+    print("2. Regresar")
+    accion = str(input('Ingrese la accion: '))
+    
+    if accion == "1":
+        print("ID AREA: "+area)
+        no_mesa  = str(input(("Ingrese el numero de mesa: ")))
+        nombre_area = obtener_area(connection=connection,area_id=area)
+        
+        if len(validar_mesa(no_mesa=no_mesa, area_id=area,connection=connection)) == 1:
+            print("Valid")
+        else:
+            print("Mesa no esta en esta area")
+
+    elif accion == "2":
+        pass
+
 
 def opcionesMesas():
     print("Usted Puede realizar:")
@@ -21,7 +71,12 @@ def mesas(database):
         
         headers = ["Numero de mesa", "Capacidad", "Estado", "Esta Unida"]
         pantalla_mesas = obtener_mesas(database, area)
-        print("\n" + tabulate(pantalla_mesas, headers=headers))
+        if pantalla_mesas == []:
+            pass
+        else:
+            print("\n" + tabulate(pantalla_mesas, headers=headers))
+            accionMesa(area=area, connection=database)
+
         
     elif opcion=='2':
         pass

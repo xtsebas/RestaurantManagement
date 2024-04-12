@@ -66,7 +66,7 @@ def obtener_mesas(connection, area_id):
         cursor.close()
         return rows
     except (Exception, psycopg2.Error) as error:
-        print("Error al obtener mesas:", error)
+        print("Error al obtener mesa o mesa invalida:", error)
         return []
 
 def obtener_cocina(connection):
@@ -115,5 +115,18 @@ def obtener_bar(connection):
         # Return an empty list in case of error
         return []
 
+def obtener_area(connection, area_id):
+    try:
+        cursor = connection.cursor()
+        query = "SELECT nombre_area FROM area WHERE area_id = "+area_id
+        cursor.execute(query)
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener mesas:", error)
+        return []
 
 
