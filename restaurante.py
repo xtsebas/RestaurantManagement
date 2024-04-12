@@ -2,6 +2,8 @@ from db_test1 import *
 from tabulate import tabulate
 import os
 from controller import *
+import bcrypt
+
 
 """
 Funciones relacionadas con el flujo del restaurante
@@ -96,6 +98,22 @@ def mesas(database):
 """
 Funciones relacionadas con el inicio de sesion
 """
+def registrarse(connection):
+    print("===============\nRegistro\n==============")
+    nombre_empleado = str(input("Ingrese el nombre del empleado: "))
+    rol = str(input("Ingrese el rol del empleado: "))
+    area_asignada = str(input("Ingrese el area asignada del empleado: "))
+    cotrasena = str(input("Ingrese la contrasena: "))
+    hash_password = bcrypt.hashpw(cotrasena.encode('utf-8'), bcrypt.gensalt())
+    print(f"Nombre: {nombre_empleado}, Rol: {rol}, Area: {area_asignada}, Contrasena: {cotrasena}, hash: {hash_password}")
+    db_signIn(
+        connection=connection,
+        nombre_empleado=nombre_empleado,
+        rol=rol,
+        area_asignada=area_asignada,
+        hash_password=hash_password
+    )
+    return None
 
 """
 Funcion general del manejor del restaurante
@@ -180,7 +198,7 @@ while True:
         #opciones de login
         restaurante(database) #al logear muestra restaurante
     elif accion == "2":
-        #registro
+        registrarse(connection=database)
         pass
     elif accion == "3":
         break

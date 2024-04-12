@@ -129,4 +129,30 @@ def obtener_area(connection, area_id):
         print("Error al obtener mesas:", error)
         return []
 
+def db_signIn(
+            connection,
+            nombre_empleado,
+            rol,
+            area_asignada,
+            hash_password,
+        ):
+        cursor = connection.cursor()
+        query = """
+                INSERT INTO empleado (nombre_empleado, contrasena_hash, rol, area_asignada) 
+                VALUES (%s, %s, %s, %s);
+                """
+        try:
+            # Execute the query and commit changes
+            cursor.execute(query, (nombre_empleado, hash_password, rol, area_asignada))
+            connection.commit()
+            print("Empleado registrado exitosamente.")
+        except (Exception, psycopg2.Error) as error:
+            print("Error al registrar el empleado:", error)
+        finally:
+            # Close the database connection
+            if connection:
+                cursor.close()
+                connection.close()
+
+        return None
 
