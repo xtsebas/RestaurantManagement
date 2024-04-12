@@ -13,29 +13,33 @@ def cerrarCuenta():
     return None
 
 def opcionesMesa():
+    print("================================")
     print("Acciones con la mesa")
     print("1. Abrir cuenta")
     print("2. Cerrar cuenta/generar factura")
     print("3. Ordenar")
     print("4. Regresar")
+    print("================================")
 
-    opcionMesa = str(input("Ingresa accion con la mesa: "))
 
-    if opcionesMesa == "1":
-        abrirCuenta()
-    elif opcionesMesa == "2":
-        cerrarCuenta()
-    elif opcionesMesa == "3":
-        ordernar()
-    elif opcionesMesa == "4":
-        pass
+    while True:
+        opcionMesa = str(input("Ingresa accion con la mesa: "))
+
+        if opcionMesa == "1":
+            abrirCuenta()
+        elif opcionMesa == "2":
+            cerrarCuenta()
+        elif opcionMesa == "3":
+            ordernar()
+        elif opcionMesa == "4":
+            print("Regeresando")
+            break
 
     return None 
 
 def accionMesa(area,connection):
     print("\nUsted Puede realizar:")
-    print("1. Seleccionar mesa")    
-    print("2. Regresar")
+    print("1. Seleccionar mesa 2. Regresar")
     accion = str(input('Ingrese la accion: '))
     
     if accion == "1":
@@ -45,6 +49,7 @@ def accionMesa(area,connection):
         
         if len(validar_mesa(no_mesa=no_mesa, area_id=area,connection=connection)) == 1:
             print("Valid")
+            opcionesMesa()
         else:
             print("Mesa no esta en esta area")
 
