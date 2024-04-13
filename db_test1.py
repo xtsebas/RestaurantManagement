@@ -1,4 +1,5 @@
 import psycopg2
+from datetime import datetime
 import pdb #Debuggear
 
 def conectar_bd():
@@ -20,7 +21,7 @@ def conectar_bd():
 def obtener_menu(connection):
     try:
         cursor = connection.cursor()
-        query = "SELECT * FROM items"
+        query = "SELECT item_id, nombre, descripcion, precio FROM items"
         cursor.execute(query)
         rows = cursor.fetchall()
         cursor.close()
@@ -29,18 +30,6 @@ def obtener_menu(connection):
         print("Error al obtener el menú:", error)
         return []
     
-def obtener_cocina(connection):
-    try:
-        cursor = connection.cursor()
-        query = ""
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        cursor.close()
-        return rows
-    except (Exception, psycopg2.Error) as error:
-        print("Error al obtener el menú:", error)
-        return []
-
 def obtener_areas(connection):
     try:
         cursor = connection.cursor()
@@ -76,11 +65,15 @@ def obtener_cocina(connection):
         cursor = connection.cursor()
         # Define the SQL query
         query = """
-            SELECT pedidos.id_cuenta, pedidos.cantidad, items.nombre, pedidos.fecha 
+            SELECT pedidos.id_cuenta, 
+            pedidos.cantidad, 
+            items.nombre, 
+            DATE(pedidos.fecha) as fecha 
             FROM pedidos
             INNER JOIN items ON pedidos.item_id = items.item_id
             WHERE items.tipo = 'Comida'
-            ORDER BY pedidos.fecha DESC;
+            ORDER BY fecha DESC;
+
         """
         # Execute the SQL query
         cursor.execute(query)
@@ -100,11 +93,15 @@ def obtener_bar(connection):
         cursor = connection.cursor()
         # Define the SQL query
         query = """
-        SELECT pedidos.id_cuenta, pedidos.cantidad, items.nombre, pedidos.fecha 
-        FROM pedidos
-        INNER JOIN items ON pedidos.item_id = items.item_id
-        WHERE items.tipo = 'Bebida'
-        ORDER BY pedidos.fecha DESC;
+            SELECT pedidos.id_cuenta, 
+            pedidos.cantidad, 
+            items.nombre, 
+            DATE(pedidos.fecha) AS fecha 
+            FROM pedidos
+            INNER JOIN items ON pedidos.item_id = items.item_id
+            WHERE items.tipo = 'Bebida'
+            ORDER BY fecha DESC;
+
         """
         cursor.execute(query)
         rows = cursor.fetchall()
@@ -163,22 +160,19 @@ def db_register(
 def db_signin(connection, usuario, contrasena):
     cursor = connection.cursor()
     query = """
-        SELECT nombre_empleado, contrasena_hash FROM empleado
+        SELECT * FROM empleado
         WHERE nombre_empleado = %s AND contrasena_hash = %s
     """
     try:
         cursor.execute(query, (usuario, contrasena))
         rows = cursor.fetchall()
-        if not rows:
-            return []
-        else:
-            return [(row[0], row[1]) for row in rows]
+        return sum(rows, ())
     except Exception as e:
-        print("Empleado no encontrado:", e)
+        print("Empleado no encontrado", e)
         return []
 
 #estado de la mesa (ocupado o no)
-def validacion_mesa(no_mesa, area_id, connection):
+def validacion_mesa(no_mesa, area_id, connection, option, id_empleado):
     #pdb.set_trace() 
     cursor = connection.cursor()
     query = """
@@ -193,15 +187,57 @@ def validacion_mesa(no_mesa, area_id, connection):
     
     estado = result[2]
     
-    if estado:
-        return None
-    else:
-        update_query = """
-            UPDATE mesa
-            SET estado = TRUE
-            WHERE no_mesa = %s AND area_id = %s
-        """
-        cursor.execute(update_query, (no_mesa, area_id))
-        connection.commit()  
+    if option == 1:
+        if estado:
+            return None
+        else:
+            update_query = """
+                UPDATE mesa
+                SET estado = TRUE
+                WHERE no_mesa = %s AND area_id = %s
+            """
+            cursor.execute(update_query, (no_mesa, area_id))
+            connection.commit()
+            
+            cuenta = """
+                insert into cuenta (no_mesa, empleado_asociado, estado, hora_entrada)
+                values(%s, %s, %s, $s)
+            """
+            cursor.execute(cuenta, (no_mesa, id_empleado,'inactiva', datetime.now()))
+            connection.commit()
+            
+            return [no_mesa, area_id, estado, result[3]]
+    elif option == 2:
+        if estado:
+            return [no_mesa, area_id, estado, result[3]]
+        else:
+            return None
+
+#saber si la cuenta esta inactiva, activa o cerrada        
+def mesa_activa(no_mesa, connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT no_mesa, empleado_asociado, estado FROM cuenta
+        WHERE no_mesa = %s
+    """
+    try:
+        cursor.execute(query, (no_mesa,))
+        result = cursor.fetchone()
         
-        return [no_mesa, area_id, estado, result[3]]
+        if not result:
+            return "La cuenta ya está cerrada"
+        
+        estado = result[2]
+        if estado == 'activa':
+            return "La cuenta ya está abierta"
+        else:
+            update_query = """
+                UPDATE cuenta
+                SET estado = 'activa'
+                WHERE no_mesa = %s
+            """
+            cursor.execute(update_query, (no_mesa,))
+            connection.commit()
+            return "La cuenta ha sido abierta exitosamente"
+    except Exception as e:
+        return "Error al procesar la solicitud: {}".format(str(e))

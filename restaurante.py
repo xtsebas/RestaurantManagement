@@ -9,41 +9,40 @@ import pdb #Debuggear
 """
 Funciones relacionadas con el flujo del restaurante
 """
-def ordernar():
-    return None
 
-def abrirCuenta(no_mesa,connection):
+def ordenar(no_mesa,connection):
     if mesa_disponible(no_mesa,connection):
-        print("Cuenta abierta exitosamente")
-    return None
+        headers = ["item_id", "Nombre", "Descripcion", "Precio"]
+        print(tabulate(obtener_menu(connection=connection), headers=headers))
+        pedido = str(input("Ingresa pedido: "))
+
 
 def cerrarCuenta():
     return None
 
 def opcionesMesa(no_mesa,connection):
-    print("================================")
-    print("Acciones con la mesa")
-    print("1. Abrir cuenta")
-    print("2. Cerrar cuenta/generar factura")
-    print("3. Ordenar")
-    print("4. Regresar")
-    print("================================")
-
-
     while True:
+        print("================================")
+        print("Acciones con la mesa")
+        print("1. Abrir cuenta")
+        print("2. Ordenar")
+        print("3. Cerrar cuenta/generar factura")
+        print("4. Regresar")
+        print("================================")
         opcionMesa = str(input("Ingresa accion con la mesa: "))
 
         if opcionMesa == "1":
-            abrirCuenta(no_mesa, connection)
+            print(mesa_activa(no_mesa, connection))
         elif opcionMesa == "2":
-            cerrarCuenta()
+            ordenar(no_mesa,connection)
         elif opcionMesa == "3":
-            ordernar()
+            cerrarCuenta()
         elif opcionMesa == "4":
             print("Regeresando")
-            break
-
-    return None 
+            time.sleep(3)
+            restaurante(connection)
+            
+            
 
 def accionMesa(area,connection):
     print("\nUsted Puede realizar:")
@@ -54,31 +53,32 @@ def accionMesa(area,connection):
         print("ID AREA: "+area)
         no_mesa  = str(input(("Ingrese el numero de mesa: ")))
         nombre_area = obtener_area(connection=connection,area_id=area)
-        validar=validacion_mesa(no_mesa=no_mesa, area_id=area,connection=connection)
+        validar=validacion_mesa(no_mesa=no_mesa, area_id=area,connection=connection, option=1, id_empleado=current_user[0])
         
         #pdb.set_trace() 
         if validar is not None and len(validar) > 0:
-            print("Valid")
-            opcionesMesa(no_mesa,connection)
+            print("Mesa ocupada exitosamente")
         else:
             print("Mesa no disponible")
 
     elif accion == "2":
-        pass
+        print("ID AREA: "+area)
+        no_mesa  = str(input(("Ingrese el numero de mesa: ")))
+        nombre_area = obtener_area(connection=connection,area_id=area)
+        validar=validacion_mesa(no_mesa=no_mesa, area_id=area,connection=connection, option=2, id_empleado=current_user[0])
+        if validar is not None and len(validar) > 0:
+            opcionesMesa(no_mesa,connection)
+        else:
+            print("Mesa sin clientes")
     
     elif accion == "3":
         pass
 
-
-def opcionesMesas():
-    print("Usted Puede realizar:")
-    print("1. Elegir Area       2. Juntar Mesas     3. Escribir una queja")
-    return str(input("\nIngrese el su opcion deseada: "))
-
-
 #mostrar mesas
 def mesas(database):
-    opcion = opcionesMesas()
+    print("Usted Puede realizar:")
+    print("1. Elegir Area       2. Juntar Mesas     3. Escribir una queja")
+    opcion = str(input("\nIngrese el su opcion deseada: "))
     
     if opcion=='1':
         print("\nElige el area")
@@ -196,8 +196,9 @@ def restaurante(database):
 database = conectar_bd()
 
 while True:
+    os.system('cls' if os.name == 'nt' else 'clear')
     print("============ Restaurant managment ===========")
-    print("1. Iniciar sesicion\n2. Registrarse\n3. Salir")
+    print("1. Iniciar sesion\n2. Registrarse\n3. Salir")
     accion = str(input("Ingrese su opcion ---> "))
 
     if accion == "1":
@@ -212,10 +213,11 @@ while True:
             time.sleep(3)
             time_left = 3
             while time_left > 0:
-                print("Redirigiendo, quedan {} para ingresar".format(time_left))
+                print("Redirigiendo, quedan {} segundo/s para ingresar".format(time_left))
                 time.sleep(1)
                 time_left -= 1
             os.system('cls' if os.name == 'nt' else 'clear')
+            print("Ingresaste como:" + current_user[1] + "\nTu area asignada es: " + current_user[4])
             restaurante(database)
         else:
             os.system('cls' if os.name == 'nt' else 'clear')
