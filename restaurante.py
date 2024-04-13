@@ -3,7 +3,8 @@ from tabulate import tabulate
 import os
 from controller import *
 import bcrypt
-
+import time
+import pdb #Debuggear
 
 """
 Funciones relacionadas con el flujo del restaurante
@@ -46,21 +47,26 @@ def opcionesMesa(no_mesa,connection):
 
 def accionMesa(area,connection):
     print("\nUsted Puede realizar:")
-    print("1. Seleccionar mesa 2. Regresar")
+    print("1. Sentar clientes en una mesa    2. Atender una mesa      3. Regresar")
     accion = str(input('Ingrese la accion: '))
     
     if accion == "1":
         print("ID AREA: "+area)
         no_mesa  = str(input(("Ingrese el numero de mesa: ")))
         nombre_area = obtener_area(connection=connection,area_id=area)
+        validar=validacion_mesa(no_mesa=no_mesa, area_id=area,connection=connection)
         
-        if len(validar_mesa(no_mesa=no_mesa, area_id=area,connection=connection)) == 1:
+        #pdb.set_trace() 
+        if validar is not None and len(validar) > 0:
             print("Valid")
             opcionesMesa(no_mesa,connection)
         else:
-            print("Mesa no esta en esta area")
+            print("Mesa no disponible")
 
     elif accion == "2":
+        pass
+    
+    elif accion == "3":
         pass
 
 
@@ -84,7 +90,7 @@ def mesas(database):
         headers = ["Numero de mesa", "Capacidad", "Estado", "Esta Unida"]
         pantalla_mesas = obtener_mesas(database, area)
         if pantalla_mesas == []:
-            pass
+            print("Mesa Ocupada")
         else:
             print("\n" + tabulate(pantalla_mesas, headers=headers))
             accionMesa(area=area, connection=database)
@@ -106,7 +112,7 @@ def registrarse(connection):
     cotrasena = str(input("Ingrese la contrasena: "))
     hash_password = bcrypt.hashpw(cotrasena.encode('utf-8'), bcrypt.gensalt())
     print(f"Nombre: {nombre_empleado}, Rol: {rol}, Area: {area_asignada}, Contrasena: {cotrasena}, hash: {hash_password}")
-    db_signIn(
+    db_register(
         connection=connection,
         nombre_empleado=nombre_empleado,
         rol=rol,
@@ -195,8 +201,25 @@ while True:
     accion = str(input("Ingrese su opcion ---> "))
 
     if accion == "1":
-        #opciones de login
-        restaurante(database) #al logear muestra restaurante
+        usuario = str(input("Ingrese su usuario ---> "))
+        contrasena = str(input("Ingrese su contraseña ---> "))
+        user = db_signin(connection=database, usuario=usuario, contrasena=contrasena )
+        if len(user) > 0:
+            current_user = user
+            user = []
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("INGRESO EXITOSO")
+            time.sleep(3)
+            time_left = 3
+            while time_left > 0:
+                print("Redirigiendo, quedan {} para ingresar".format(time_left))
+                time.sleep(1)
+                time_left -= 1
+            os.system('cls' if os.name == 'nt' else 'clear')
+            restaurante(database)
+        else:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("USUARIO O CONTRASEÑA INCORRECTOS, INTENTELO DE NUEVO")
     elif accion == "2":
         registrarse(connection=database)
         pass

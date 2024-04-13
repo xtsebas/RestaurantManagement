@@ -1,4 +1,5 @@
 import psycopg2
+import pdb #Debuggear
 
 def conectar_bd():
     try:
@@ -58,8 +59,9 @@ def obtener_mesas(connection, area_id):
     try:
         cursor = connection.cursor()
         query = """
-            select no_mesa , capacidad, estado, unida from mesa 
-            where area_id = %s
+        SELECT no_mesa, capacidad, estado, unida FROM mesa 
+        WHERE area_id = %s
+        ORDER BY no_mesa ASC
         """
         cursor.execute(query, (area_id))
         rows = cursor.fetchall()
@@ -129,7 +131,8 @@ def obtener_area(connection, area_id):
         print("Error al obtener mesas:", error)
         return []
 
-def db_signIn(
+#registro de usuarios
+def db_register(
             connection,
             nombre_empleado,
             rol,
@@ -156,3 +159,49 @@ def db_signIn(
 
         return None
 
+#sign in con verificacion de usuario
+def db_signin(connection, usuario, contrasena):
+    cursor = connection.cursor()
+    query = """
+        SELECT nombre_empleado, contrasena_hash FROM empleado
+        WHERE nombre_empleado = %s AND contrasena_hash = %s
+    """
+    try:
+        cursor.execute(query, (usuario, contrasena))
+        rows = cursor.fetchall()
+        if not rows:
+            return []
+        else:
+            return [(row[0], row[1]) for row in rows]
+    except Exception as e:
+        print("Empleado no encontrado:", e)
+        return []
+
+#estado de la mesa (ocupado o no)
+def validacion_mesa(no_mesa, area_id, connection):
+    #pdb.set_trace() 
+    cursor = connection.cursor()
+    query = """
+        SELECT no_mesa, area_id, estado, unida FROM mesa
+        WHERE no_mesa = %s AND area_id = %s
+    """
+    cursor.execute(query, (no_mesa, area_id))
+    result = cursor.fetchone()
+    
+    if not result:
+        return None
+    
+    estado = result[2]
+    
+    if estado:
+        return None
+    else:
+        update_query = """
+            UPDATE mesa
+            SET estado = TRUE
+            WHERE no_mesa = %s AND area_id = %s
+        """
+        cursor.execute(update_query, (no_mesa, area_id))
+        connection.commit()  
+        
+        return [no_mesa, area_id, estado, result[3]]
