@@ -36,13 +36,44 @@ def cerrarCuenta(no_mesa, connection):
     cuenta = idCuenta(no_mesa, connection)
     print(tabulate(mostrar_cuenta(cuenta, connection=connection), headers=headers))
     total = totales(cuenta, connection)
-    total_sin_aumento, total_con_aumento = zip(*total)
-    print("Totales parcial: Q.", total)
-    print("Totales con propina (10%): Q.", total_con_aumento)
-    print("Total: Q.", total_con_aumento + total)
+    total_sin_aumento, total_con_aumento = total[0]
+    propina = round((total_sin_aumento * 0.1), 2)
+    total_con_aumento = round(total_con_aumento, 2)
+    print("\nTotales parcial: Q.", round(total_sin_aumento, 2))
+    print("Propina: Q.", round(propina, 2))
+    print("Total: Q.", total_con_aumento)
     nombre = str(input("Nombre para la factura: "))
     direccion = str(input("Direccion: "))
     nit = int(input("NIT para la factura: "))
+    headers2 = ["ID", "Cuenta", "NIT", "Nombre", "Direccion", "Total parcial", "Propina", "Total final", "Fecha"]
+    facturas = factura(cuenta, nit, nombre, direccion, round(total_sin_aumento, 2), propina, total_con_aumento, connection)
+    id_factura= facturas[0][0]
+    print(tabulate(facturas, headers=headers2))
+    while total_con_aumento != 0:
+        print("\nMonto a pagar: ", total_con_aumento)
+        print("Metodos de pago\n1.Efectivo          2.Tarjeta de credito/debito")
+        metodo = int(input("Ingrese su metodo: "))
+        if metodo==1:
+            monto = float(input("Ingrese su monto: "))
+            if monto > total_con_aumento:
+                print(transaccion(id_factura, 'efectivo', monto, connection))
+                vuelto = monto - total_con_aumento
+                print("Su cambio es de: Q.", vuelto)
+                total_con_aumento = total_con_aumento - (monto - vuelto)
+            else:
+                print(transaccion(id_factura, 'efectivo', monto, connection))
+                total_con_aumento = total_con_aumento - monto
+        elif metodo == 2:
+            monto = float(input("Ingrese su monto: "))
+            if monto > total_con_aumento:
+                print("Ingrese una cantidad menor o exacta al total")
+            else:
+                print(transaccion(id_factura, 'efectivo', monto, connection)) 
+                total_con_aumento = total_con_aumento - monto
+        else:
+            print("Ingrese el metodo correcto")
+    
+
 
 def opcionesMesa(no_mesa,connection):
     while True:
@@ -64,8 +95,9 @@ def opcionesMesa(no_mesa,connection):
         elif opcionMesa == "3":
             cerrarCuenta(no_mesa,connection)
             os.system('cls' if os.name == 'nt' else 'clear')
+            restaurante(connection)
         elif opcionMesa == "4":
-            print("Regeresando")
+            print("Regresando")
             time.sleep(3)
             restaurante(connection)
             
@@ -99,7 +131,9 @@ def accionMesa(area,connection):
             print("Mesa sin clientes")
     
     elif accion == "3":
-        pass
+        print("Regresando")
+        time.sleep(3)
+        restaurante(connection)
 
 #mostrar mesas
 def mesas(database):
@@ -117,12 +151,11 @@ def mesas(database):
         headers = ["Numero de mesa", "Capacidad", "Estado", "Esta Unida"]
         pantalla_mesas = obtener_mesas(database, area)
         if pantalla_mesas == []:
-            print("Mesa Ocupada")
+            print("Area inexistente")
         else:
             print("\n" + tabulate(pantalla_mesas, headers=headers))
             accionMesa(area=area, connection=database)
 
-        
     elif opcion=='2':
         pass
     elif opcion=='3':

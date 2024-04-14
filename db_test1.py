@@ -417,10 +417,10 @@ def mostrar_cuenta(id_cuenta, connection):
     try:
         cursor = connection.cursor()
         query = """
-            select a.nombre, count(b.*) as cantidad, sum(a.precio) as Total_parcial from items a
+            select a.nombre, b.cantidad, sum(a.precio * b.cantidad) as Total_parcial from items a
             join pedidos b on a.item_id = b.item_id 
-            where b.id_cuenta = %s
-            group by a.nombre
+            where b.id_cuenta =%s
+            group by a.nombre, b.cantidad 
             order by sum(a.precio) asc
         """
         cursor.execute(query, (id_cuenta,))
@@ -435,39 +435,72 @@ def totales(id_cuenta, connection):
     try:
         cursor = connection.cursor()
         query = """
-            SELECT SUM(a.precio) AS total, SUM(a.precio * 1.1) AS total_con_aumento
-            FROM items a
-            JOIN pedidos b ON a.item_id = b.item_id 
-            WHERE b.id_cuenta = %s
+            SELECT 
+                SUM(parcial) AS total_sin_aumento, 
+                SUM(parcial) * 1.1 AS total_con_aumento
+            FROM (
+                SELECT 
+                    SUM(a.precio * b.cantidad) AS parcial
+                FROM 
+                    items a
+                    JOIN pedidos b ON a.item_id = b.item_id 
+                WHERE 
+                    b.id_cuenta = %s
+            ) AS subquery;
         """
         cursor.execute(query, (id_cuenta,))
         rows = cursor.fetchall()
         cursor.close()
         
-        totales = [(row[0], row[1]) for row in rows]
-        
-        return totales
+        if rows:
+            totales = [(row[0], row[1]) for row in rows]
+            return totales
+        else:
+            print("No se encontraron resultados para la cuenta.")
+            return []        
     except (Exception, psycopg2.Error) as error:
         print("Error al obtener los totales:", error)
         return [] 
 
-def totales(id_cuenta, connection):
+def factura(id_cuenta, nit, nombre_cliente, direccion, total, propina, cobro, connection):
     try:
         cursor = connection.cursor()
         query = """
             insert into factura (cuenta_id, nit, nombre_cliente, direccion_cliente, total, propina, cobro, fecha)
-            values(35, %s, %s, %s, %s, %s, %s, now())
+            values(%s, %s, %s, %s, %s, %s, %s, now())
         """
-        cursor.execute(query, (id_cuenta,))
-        rows = cursor.fetchall()
-        cursor.close()
-        
-        totales = [(row[0], row[1]) for row in rows]
-        
-        return totales
+        cursor.execute(query, (id_cuenta, nit, nombre_cliente, direccion, total, propina, cobro))
+        connection.commit()
+        try:
+            cursor = connection.cursor()
+            query = "SELECT * FROM factura WHERE cuenta_id = %s"
+            cursor.execute(query, (id_cuenta,))
+            rows = cursor.fetchall()
+            cursor.close()
+            return rows
+        except (Exception, psycopg2.Error) as error:
+            print("Error al obtener la factura:", error)
+            return []
+                
     except (Exception, psycopg2.Error) as error:
-        print("Error al obtener la cuenta:", error)
-        return [] 
+        print("Error al generar la factura:", error)
+        return []
+    
+def transaccion(factura_id, metodo, monto, connection):
+    try:
+        cursor = connection.cursor()
+        query = """
+            insert into transaccion (factura_id, metodo, monto)
+            values(%s, %s, %s)
+        """
+        cursor.execute(query, (factura_id, metodo, monto))
+        cursor.close()
+        connection.commit()
+        return "Transaccion realizada"       
+    except (Exception, psycopg2.Error) as error:
+        print("Error al generar la factura:", error)
+        return "Error"
+    
 
 
 #Reporte de platos pedidos en cierto rango de fecha
