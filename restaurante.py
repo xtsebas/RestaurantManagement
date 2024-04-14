@@ -77,7 +77,7 @@ def accionMesa(area,connection):
 #mostrar mesas
 def mesas(database):
     print("Usted Puede realizar:")
-    print("1. Elegir Area       2. Juntar Mesas     3. Escribir una queja")
+    print("1. Elegir Area       2. Juntar Mesas     3. Escribir una queja     4. Encuesta final")
     opcion = str(input("\nIngrese el su opcion deseada: "))
     
     if opcion=='1':
@@ -99,8 +99,42 @@ def mesas(database):
     elif opcion=='2':
         pass
     elif opcion=='3':
+        ingresar_queja(database)
         pass
-    
+    elif opcion=="4":
+        encuesta_final(database)
+
+def encuesta_final(database):
+    get_empleados(database)
+    empleado_id = str(input("Ingrese el id del empleado -> "))
+    get_cuentas(database)
+    cuenta_id = str(input("Ingrese el numero de cuenta -> "))
+    amabilidad = validar_calificacion("amabilidad")
+    exactitud = validar_calificacion("exactitud")
+    submit_encuesta_final(connection=database, empleado_id=empleado_id, cuenta_id=cuenta_id, amabilidad=amabilidad,exactitud=exactitud)
+    print("\n===========================\n     Que vuelva pronto!\n===========================")
+
+def ingresar_queja(database):
+    print("\n==============================================\n     FORMULARIO DE QUEJAS        \n==============================================")
+    empleado_id = ""
+    item_id = ""
+    nit_cliente = ""
+
+    about_empleado = validar_opcion_queja("empleado")
+    if about_empleado:
+        get_empleados(database)
+        empleado_id = str(input("Ingrese el ID del empleado =>"))
+
+    about_item = validar_opcion_queja("plato o bebida")
+    if about_item:
+        get_items(database)
+        item_id = str(input("Ingrese el id del plato/bebida =>"))
+
+    nit_cliente = str(input("Ingrese el nit del cliente =>"))
+    motivo = str(input("Describa el motivo de la queja => "))
+    print('NOTA: siendo 5 una queja muy grave')
+    clasificacion = validar_calificacion("motivacion de su queja")
+    submit_queja(connection=database,empleado_id=empleado_id,item_id=item_id, nit_cliente=nit_cliente,clasificacion=clasificacion,motivo=motivo)
 """
 Funciones relacionadas con el inicio de sesion
 """

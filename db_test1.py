@@ -1,6 +1,8 @@
 import psycopg2
 from datetime import datetime
 import pdb #Debuggear
+from tabulate import tabulate
+
 
 def conectar_bd():
     try:
@@ -241,3 +243,92 @@ def mesa_activa(no_mesa, connection):
             return "La cuenta ha sido abierta exitosamente"
     except Exception as e:
         return "Error al procesar la solicitud: {}".format(str(e))
+
+def get_empleados(connection):
+    try:
+        cursor = connection.cursor()
+        query = "SELECT empleado_id, nombre_empleado FROM empleado;"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        
+        headers = ["ID EMPLEADO", "NOMBRE EMPLEADO"]
+        print(tabulate(rows, headers=headers))
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el menú:", error)
+        return []
+    
+
+def get_cuentas(connection):
+    try:
+        cursor = connection.cursor()
+        query = "select id_cuenta from cuenta LIMIT 10;"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        
+        headers = ["ID CUENTA"]
+        print(tabulate(rows, headers=headers))
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el menú:", error)
+        return []
+
+def get_items(connection):
+    try:
+        cursor = connection.cursor()
+        query = "SELECT item_id, nombre from items;"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        
+        headers = ["ID PLATO/BEBIDA", "NOMBRE"]
+        print(tabulate(rows, headers=headers))
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el menú:", error)
+        return []
+    
+def submit_encuesta_final(connection, empleado_id, cuenta_id, amabilidad, exactitud):
+    """Insert survey data into the encuesta_final table."""
+    # SQL command to insert data
+    query = """
+    INSERT INTO encuesta_final (empleado_id, cuenta_id, amabilidad, exactitud)
+    VALUES (%s, %s, %s, %s);
+    """
+    try:
+        # Create a cursor object using the connection
+        cursor = connection.cursor()
+        # Execute the query with provided data
+        cursor.execute(query, (empleado_id, cuenta_id, amabilidad, exactitud))
+        # Commit the changes to the database
+        connection.commit()
+        print("Encuesta submitted successfully.")
+    except psycopg2.Error as e:
+        # If an error occurs, rollback any changes made during the transaction
+        connection.rollback()
+        print(f"An error occurred while submitting the encuesta: {e}")
+    finally:
+        # Always close the cursor to release database resources
+        cursor.close()    
+
+def submit_queja(connection, empleado_id, item_id, nit_cliente, clasificacion, motivo):
+    """Insert complaint data into the queja table with potential NULL values for employee or item IDs."""
+    query = """
+    INSERT INTO queja (empleado_id, item_id, nit_cliente, fecha, calificacion, motivo)
+    VALUES (%s, %s, %s, NOW(), %s, %s);
+    """
+    try:
+        cursor = connection.cursor()
+        # Handling potential NULL values for empleado_id and item_id
+        empleado_id = empleado_id or None  # This will pass None if empleado_id is an empty string
+        item_id = item_id or None  # This will pass None if item_id is an empty string
+        cursor.execute(query, (empleado_id, item_id, nit_cliente, clasificacion, motivo))
+        connection.commit()
+        print("Queja submitted successfully with the current date and time.")
+    except Exception as e:
+        connection.rollback()
+        print(f"An error occurred while submitting the queja: {e}")
+    finally:
+        cursor.close()
