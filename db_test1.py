@@ -354,13 +354,32 @@ def ingresar_pedido(pedido, cantidad, no_mesa, connection):
         print("Agregado a la cuenta exitosamente")
     else:
         print("No se encontró una cuenta activa para la mesa especificada.")
-        
+
+def idCuenta(no_mesa, connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT id_cuenta FROM cuenta
+        WHERE no_mesa = %s AND estado = 'cerrada'
+    """
+    try:
+        cursor.execute(query, (no_mesa,))
+        resultado = cursor.fetchone()
+        if resultado:
+            id_cuenta = int(resultado[0])
+            return id_cuenta
+        else:
+            return None
+    except Exception as e:
+        print("Error al regresar el id de la cuenta:", e)
+        return None 
+
+    
 #cerrar una cuenta
 def cerrar_cuenta(no_mesa, connection):
     cursor = connection.cursor()
     query = """
         SELECT no_mesa, empleado_asociado, estado FROM cuenta
-        WHERE no_mesa = %s and estado = 'activa'
+        WHERE no_mesa = %s AND estado = 'activa'
     """
     try:
         cursor.execute(query, (no_mesa,))
@@ -380,9 +399,11 @@ def cerrar_cuenta(no_mesa, connection):
             cursor.execute(update_query, (no_mesa,))
             update_query2 = """
                 UPDATE mesa
-                SET estado = FALSE,
+                SET estado = FALSE
                 WHERE no_mesa = %s
             """
+            cursor.execute(update_query, (no_mesa,))
+            connection.commit()
             cursor.execute(update_query2, (no_mesa,))
             connection.commit()
             return "La cuenta ha sido cerrada exitosamente"
@@ -392,6 +413,61 @@ def cerrar_cuenta(no_mesa, connection):
     except Exception as e:
         return "Error al procesar la solicitud: {}".format(str(e))
 
+def mostrar_cuenta(id_cuenta, connection):
+    try:
+        cursor = connection.cursor()
+        query = """
+            select a.nombre, count(b.*) as cantidad, sum(a.precio) as Total_parcial from items a
+            join pedidos b on a.item_id = b.item_id 
+            where b.id_cuenta = %s
+            group by a.nombre
+            order by sum(a.precio) asc
+        """
+        cursor.execute(query, (id_cuenta,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener la cuenta:", error)
+        return []    
+
+def totales(id_cuenta, connection):
+    try:
+        cursor = connection.cursor()
+        query = """
+            SELECT SUM(a.precio) AS total, SUM(a.precio * 1.1) AS total_con_aumento
+            FROM items a
+            JOIN pedidos b ON a.item_id = b.item_id 
+            WHERE b.id_cuenta = %s
+        """
+        cursor.execute(query, (id_cuenta,))
+        rows = cursor.fetchall()
+        cursor.close()
+        
+        totales = [(row[0], row[1]) for row in rows]
+        
+        return totales
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener los totales:", error)
+        return [] 
+
+def totales(id_cuenta, connection):
+    try:
+        cursor = connection.cursor()
+        query = """
+            insert into factura (cuenta_id, nit, nombre_cliente, direccion_cliente, total, propina, cobro, fecha)
+            values(35, %s, %s, %s, %s, %s, %s, now())
+        """
+        cursor.execute(query, (id_cuenta,))
+        rows = cursor.fetchall()
+        cursor.close()
+        
+        totales = [(row[0], row[1]) for row in rows]
+        
+        return totales
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener la cuenta:", error)
+        return [] 
 
 
 #Reporte de platos pedidos en cierto rango de fecha

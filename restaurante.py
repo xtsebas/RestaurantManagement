@@ -22,9 +22,27 @@ def ordenar(no_mesa,connection):
 
 
 def cerrarCuenta(no_mesa, connection):
-    print(cerrar_cuenta(no_mesa, connection))
-    print("\nSu cuenta es: ")
-    
+    print(cerrar_cuenta(int(no_mesa), connection))
+    print("\nGenerando Factura")
+    time.sleep(3)
+    time_left = 3
+    while time_left > 0:
+        print("Generando factura en {}".format(time_left))
+        time.sleep(1)
+        time_left -= 1
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("\nSu cuenta es: \n")
+    headers = ["Plato", "Cantidad", "Precio"]
+    cuenta = idCuenta(no_mesa, connection)
+    print(tabulate(mostrar_cuenta(cuenta, connection=connection), headers=headers))
+    total = totales(cuenta, connection)
+    total_sin_aumento, total_con_aumento = zip(*total)
+    print("Totales parcial: Q.", total)
+    print("Totales con propina (10%): Q.", total_con_aumento)
+    print("Total: Q.", total_con_aumento + total)
+    nombre = str(input("Nombre para la factura: "))
+    direccion = str(input("Direccion: "))
+    nit = int(input("NIT para la factura: "))
 
 def opcionesMesa(no_mesa,connection):
     while True:
@@ -39,10 +57,13 @@ def opcionesMesa(no_mesa,connection):
 
         if opcionMesa == "1":
             print(mesa_activa(no_mesa, connection))
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif opcionMesa == "2":
             ordenar(no_mesa,connection)
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif opcionMesa == "3":
             cerrarCuenta(no_mesa,connection)
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif opcionMesa == "4":
             print("Regeresando")
             time.sleep(3)
