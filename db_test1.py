@@ -1,7 +1,7 @@
-import psycopg2
+import psycopg2 # type: ignore
 from datetime import datetime
 import pdb #Debuggear
-from tabulate import tabulate
+from tabulate import tabulate # type: ignore
 
 
 def conectar_bd():
@@ -332,3 +332,128 @@ def submit_queja(connection, empleado_id, item_id, nit_cliente, clasificacion, m
         print(f"An error occurred while submitting the queja: {e}")
     finally:
         cursor.close()
+        
+#Ingresar pedido
+def ingresar_pedido(pedido, cantidad, no_mesa, connection):
+    cursor = connection.cursor()
+    query="""
+        select id_cuenta from cuenta
+        where no_mesa = %s and estado = 'activa'
+    """
+    cursor.execute(query, (no_mesa,))
+    resultado = cursor.fetchone()
+    if resultado:
+        id_cuenta = int(resultado[0])  
+        print(id_cuenta)
+        query2="""
+            insert into pedidos(id_cuenta, item_id, cantidad, fecha)
+            values (%s, %s, %s, now())
+        """
+        cursor.execute(query2, (id_cuenta, pedido, cantidad))
+        connection.commit()
+        print("Agregado a la cuenta exitosamente")
+    else:
+        print("No se encontró una cuenta activa para la mesa especificada.")
+        
+#cerrar una cuenta
+def cerrar_cuenta(no_mesa, connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT no_mesa, empleado_asociado, estado FROM cuenta
+        WHERE no_mesa = %s and estado = 'activa'
+    """
+    try:
+        cursor.execute(query, (no_mesa,))
+        result = cursor.fetchone()
+        
+        if not result:
+            return "La cuenta ya está cerrada"
+
+        estado = result[2]
+        if estado == 'activa':
+            update_query = """
+                UPDATE cuenta
+                SET estado = 'cerrada',
+                    hora_salida = now()
+                WHERE no_mesa = %s
+            """
+            cursor.execute(update_query, (no_mesa,))
+            update_query2 = """
+                UPDATE mesa
+                SET estado = FALSE,
+                WHERE no_mesa = %s
+            """
+            cursor.execute(update_query2, (no_mesa,))
+            connection.commit()
+            return "La cuenta ha sido cerrada exitosamente"
+        else:
+            return "La cuenta no ha sido abierta"
+
+    except Exception as e:
+        return "Error al procesar la solicitud: {}".format(str(e))
+
+
+
+#Reporte de platos pedidos en cierto rango de fecha
+def platos_pedidos(inicial, final, connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT i.nombre AS plato, COUNT(p.item_id) AS cantidad_pedidos
+        FROM pedidos p
+        JOIN items i ON p.item_id = i.item_id
+        WHERE p.fecha BETWEEN %s AND %s
+        GROUP BY i.nombre, p.item_id
+        ORDER BY COUNT(p.item_id) DESC
+    """
+    try:
+        cursor.execute(query, (inicial, final))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el reporte:", error)
+        return []
+
+#Reporte de hora donde se realizan mas pedidos en cierto rango de fecha
+def horario_pedidos(inicial, final, connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT EXTRACT(HOUR FROM fecha) AS hora_del_dia, COUNT(*) AS cantidad_pedidos
+        FROM pedidos
+        WHERE fecha BETWEEN %s AND %s
+        GROUP BY EXTRACT(HOUR FROM fecha)
+        ORDER BY cantidad_pedidos DESC;
+    """
+    try:
+        cursor.execute(query, (inicial + ' 00:00:00', final + ' 23:59:59'))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el reporte:", error)
+        return []
+
+#Reporte de promedio de tiempo que tardan los clientes en comer agrupados en personas en cierto rango de fecha
+def personas_tiempo(inicial, final, connection):
+    cursor = connection.cursor()
+    query = """
+        SELECT 
+            personas,
+            EXTRACT(HOUR FROM AVG(tiempo_comida)) AS horas_promedio,
+            EXTRACT(MINUTE FROM AVG(tiempo_comida)) AS minutos_promedio
+        FROM (
+            SELECT a.capacidad as personas, (b.hora_salida - b.hora_entrada) as tiempo_comida from mesa a 
+            join cuenta b on a.no_mesa = b.no_mesa
+            where b.estado = 'cerrada' and b.hora_salida notnull and b.hora_salida between %s AND %s
+        ) AS tiempos_por_cuenta
+        GROUP BY personas
+        ORDER BY personas;
+    """
+    try:
+        cursor.execute(query, (inicial, final))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el reporte:", error)
+        return []
