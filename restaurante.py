@@ -1,8 +1,8 @@
 from db_test1 import *
-from tabulate import tabulate
+from tabulate import tabulate # type: ignore 
 import os
 from controller import *
-import bcrypt
+import bcrypt # type: ignore
 import time
 import pdb #Debuggear
 
@@ -11,14 +11,38 @@ Funciones relacionadas con el flujo del restaurante
 """
 
 def ordenar(no_mesa,connection):
-    if mesa_disponible(no_mesa,connection):
+    if mesa_activa(no_mesa,connection) == "La cuenta ya está abierta":
         headers = ["item_id", "Nombre", "Descripcion", "Precio"]
         print(tabulate(obtener_menu(connection=connection), headers=headers))
-        pedido = str(input("Ingresa pedido: "))
+        pedido = int(input("Ingresa tu eleccion: "))
+        cantidad = int(input("Ingresar cantidad: "))
+        ingresar_pedido(pedido, cantidad, no_mesa, connection)
+    else:
+        print("CUENTA INACTIVA")
 
 
-def cerrarCuenta():
-    return None
+def cerrarCuenta(no_mesa, connection):
+    print(cerrar_cuenta(int(no_mesa), connection))
+    print("\nGenerando Factura")
+    time.sleep(3)
+    time_left = 3
+    while time_left > 0:
+        print("Generando factura en {}".format(time_left))
+        time.sleep(1)
+        time_left -= 1
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("\nSu cuenta es: \n")
+    headers = ["Plato", "Cantidad", "Precio"]
+    cuenta = idCuenta(no_mesa, connection)
+    print(tabulate(mostrar_cuenta(cuenta, connection=connection), headers=headers))
+    total = totales(cuenta, connection)
+    total_sin_aumento, total_con_aumento = zip(*total)
+    print("Totales parcial: Q.", total)
+    print("Totales con propina (10%): Q.", total_con_aumento)
+    print("Total: Q.", total_con_aumento + total)
+    nombre = str(input("Nombre para la factura: "))
+    direccion = str(input("Direccion: "))
+    nit = int(input("NIT para la factura: "))
 
 def opcionesMesa(no_mesa,connection):
     while True:
@@ -33,10 +57,13 @@ def opcionesMesa(no_mesa,connection):
 
         if opcionMesa == "1":
             print(mesa_activa(no_mesa, connection))
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif opcionMesa == "2":
             ordenar(no_mesa,connection)
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif opcionMesa == "3":
-            cerrarCuenta()
+            cerrarCuenta(no_mesa,connection)
+            os.system('cls' if os.name == 'nt' else 'clear')
         elif opcionMesa == "4":
             print("Regeresando")
             time.sleep(3)
@@ -179,30 +206,45 @@ def restaurante(database):
             mesas(database=database)
 
         elif accion == "2":
+            os.system('cls' if os.name == 'nt' else 'clear')
             print("\nPantalla de cocina")
             pantalla_cocina = obtener_cocina(database)
             headers = ["Cuenta", "Cantidad", "Plato", "Fecha"]
             print(tabulate(pantalla_cocina, headers=headers))
             
         elif accion == "3":
+            os.system('cls' if os.name == 'nt' else 'clear')
             print("\nPantalla de bar")
             pantalla_bar = obtener_bar(database)
             headers = ["Cuenta", "Cantidad", "Bebida", "Fecha"]
             print(tabulate(pantalla_bar, headers=headers))
 
         elif accion == "4":
+            os.system('cls' if os.name == 'nt' else 'clear')
             print("\nReportes")
             print("\n1. Platos mas pedidos por clientes\n2. Horario donde se ingresan mas pedidos\n3. Promedio de tiempo que tardan los clientes en comer\n4. Quejas agrupadas por persona\n5. Quejas agrupadas por item\n6. Eficiencia de los meseros por sus encuestas")
             reporte = str(input("Ingrese la pantalla: "))
             
             if reporte=="1":
-                print("1")
+                print("\nPOR FAVOR INGRESE LAS FECHAS EN ESTE FORMATO\naño-mes-dia\n")
+                inicial = str(input("Ingrese la fecha inicial: "))
+                final = str(input("Ingrese la fecha final: "))
+                headers = ["Plato", "Cantidad de veces pedido"]
+                print(tabulate(platos_pedidos(inicial, final, database), headers=headers))
                 
             elif reporte=="2":
-                print("1")
+                print("\nPOR FAVOR INGRESE LAS FECHAS EN ESTE FORMATO\naño-mes-dia\n")
+                inicial = str(input("Ingrese la fecha inicial: "))
+                final = str(input("Ingrese la fecha final: "))
+                headers = ["Hora del dia", "Cantidad de veces pedido"]
+                print(tabulate(horario_pedidos(inicial, final, database), headers=headers))
                 
             elif reporte=="3":
-                print("1")
+                print("\nPOR FAVOR INGRESE LAS FECHAS EN ESTE FORMATO\naño-mes-dia\n")
+                inicial = str(input("Ingrese la fecha inicial: "))
+                final = str(input("Ingrese la fecha final: "))
+                headers = ["Personas", "Hora promedio", "Minuto Promedio"]
+                print(tabulate(personas_tiempo(inicial, final, database), headers=headers))
                 
             elif reporte=="4":
                 print("1")
