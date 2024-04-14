@@ -34,7 +34,6 @@ def mesa_disponible(no_mesa, connection):
         
     except (Exception, psycopg2.Error) as error:
         print("Error con la mesa", error)
-<<<<<<< HEAD
         return False  # Return False on error or handle as needed
     
 def validar_calificacion(campo: str):
@@ -66,7 +65,4 @@ def validar_opcion_queja(valor:str):
         except:
             print("Ingresar un caracter valido")
 
-
-=======
         return False  # Return False on error or handle as needed
->>>>>>> 2666b36672ba67487959d2f67c698dc59bbe8c26
