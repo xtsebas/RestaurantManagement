@@ -262,8 +262,10 @@ def restaurante(database):
                 headers = ["Nombre plato/bebida", "total quejas", "promedio"]
                 print(tabulate(quejas_agrupadas_plato(database,inicial, final), headers=headers))                
             elif reporte=="6":
-                print("1")
-        
+                print("MOSTRANDO EFICIENCIA DE LOS MESEROS POR MES")
+                headers = ["nombre mesero", "año",'mes',"promedio amabilidad","promedio exactitud"]
+                print(tabulate(eficiencia_meseros(database), headers=headers))                
+            
             
             """
             menu = obtener_menu(database)

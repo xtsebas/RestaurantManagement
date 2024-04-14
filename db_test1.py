@@ -596,3 +596,34 @@ def quejas_agrupadas_plato(connection, fecha_inicial,fecha_final):
     except (Exception, psycopg2.Error) as error:
         print("Error al obtener el reporte:", error)
         return []
+
+def eficiencia_meseros(connection):
+    cursor = connection.cursor()
+    query = """
+            SELECT 
+                empleado.nombre_empleado,
+                EXTRACT(YEAR FROM cuenta.hora_entrada) AS year,
+                EXTRACT(MONTH FROM cuenta.hora_entrada) AS month,
+                AVG(encuesta_final.amabilidad) AS promedio_amabilidad,
+                AVG(encuesta_final.exactitud) AS promedio_exactitud
+            FROM 
+                empleado
+            INNER JOIN 
+                encuesta_final ON empleado.empleado_id = encuesta_final.empleado_id
+            INNER JOIN 
+                cuenta ON cuenta.id_cuenta = encuesta_final.cuenta_id
+            WHERE 
+                cuenta.hora_entrada >= CURRENT_DATE - INTERVAL '6 months'
+            GROUP BY 
+                empleado.nombre_empleado, EXTRACT(YEAR FROM cuenta.hora_entrada), EXTRACT(MONTH FROM cuenta.hora_entrada)
+            ORDER BY 
+                empleado.nombre_empleado, year, month;
+    """
+    try:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el reporte:", error)
+        return []
