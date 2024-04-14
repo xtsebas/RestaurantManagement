@@ -255,8 +255,12 @@ def restaurante(database):
                 print(tabulate(quejas_agrupadas(database,inicial, final), headers=headers))
 
             elif reporte=="5":
-                print("1")
-                
+                print("\nPOR FAVOR INGRESE LAS FECHAS EN ESTE FORMATO\naño-mes-dia\n")
+                inicial = str(input("Ingrese la fecha inicial: "))
+                final = str(input("Ingrese la fecha final: "))
+                print("RANGO DE QUEJAS POR PLATO DEL "+inicial+" AL "+final)
+                headers = ["Nombre plato/bebida", "total quejas", "promedio"]
+                print(tabulate(quejas_agrupadas_plato(database,inicial, final), headers=headers))                
             elif reporte=="6":
                 print("1")
         

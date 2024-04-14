@@ -534,6 +534,7 @@ def personas_tiempo(inicial, final, connection):
         print("Error al obtener el reporte:", error)
         return []
     
+#reporte numero 4 de quejas agrupadas por persona
 def quejas_agrupadas(connection, fecha_inicial,fecha_final):
     cursor = connection.cursor()
     query = """
@@ -557,6 +558,35 @@ def quejas_agrupadas(connection, fecha_inicial,fecha_final):
                 ON cliente.nit = subquery.nit_cliente
             ORDER BY 
                 subquery.total_quejas DESC; 
+    """
+    try:
+        cursor.execute(query, (fecha_inicial, fecha_final))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+    except (Exception, psycopg2.Error) as error:
+        print("Error al obtener el reporte:", error)
+        return []
+    
+#reporte numero 5 de quejas agrupadas por plato
+def quejas_agrupadas_plato(connection, fecha_inicial,fecha_final):
+    cursor = connection.cursor()
+    query = """
+            SELECT items.nombre, total_quejas, calificacion_promedio FROM(
+                SELECT 
+                    item_id,
+                    COUNT(item_id) AS total_quejas,  -- Cuenta el total de quejas por plato
+                    AVG(calificacion) AS calificacion_promedio  -- Calcula la calificación promedio por plato
+                FROM 
+                    queja  -- Asumiendo que 'queja' es el nombre de tu tabla de quejas
+                WHERE 
+                    fecha BETWEEN %s AND %s
+                GROUP BY 
+                    item_id
+            ) AS subquery
+            INNER JOIN items ON items.item_id = subquery.item_id
+            ORDER BY 
+                total_quejas DESC;
     """
     try:
         cursor.execute(query, (fecha_inicial, fecha_final))
