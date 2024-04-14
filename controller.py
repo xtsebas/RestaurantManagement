@@ -35,5 +35,3 @@ def mesa_disponible(no_mesa, connection):
     except (Exception, psycopg2.Error) as error:
         print("Error con la mesa", error)
         return False  # Return False on error or handle as needed
-    
-    

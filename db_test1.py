@@ -201,9 +201,9 @@ def validacion_mesa(no_mesa, area_id, connection, option, id_empleado):
             
             cuenta = """
                 insert into cuenta (no_mesa, empleado_asociado, estado, hora_entrada)
-                values(%s, %s, %s, $s)
+                values(%s, %s, %s, CURRENT_TIMESTAMP)
             """
-            cursor.execute(cuenta, (no_mesa, id_empleado,'inactiva', datetime.now()))
+            cursor.execute(cuenta, (no_mesa, id_empleado,'inactiva'))
             connection.commit()
             
             return [no_mesa, area_id, estado, result[3]]
