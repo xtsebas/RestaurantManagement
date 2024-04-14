@@ -34,6 +34,39 @@ def mesa_disponible(no_mesa, connection):
         
     except (Exception, psycopg2.Error) as error:
         print("Error con la mesa", error)
+<<<<<<< HEAD
         return False  # Return False on error or handle as needed
     
-    
+def validar_calificacion(campo: str):
+    while True:
+        print("\nEn un rango de 1 al 5 califique la "+campo+" del servicio")
+        try:
+            calificacion = int(input("Ingrese la nota => "))
+            if calificacion >= 1 and calificacion <= 5:
+                return calificacion
+            else:
+                print("Por favor ingrese un numero valido")
+        except:
+            print("Por favor ingrese un caracter valido")
+
+def validar_opcion_queja(valor:str):
+    valores = [1,2]
+    while True:
+        print("Es una queja relacionada con algun ",valor)
+        print("==========\n1. Si\n2. No\n==========\n")
+        try:
+            opcion = int(input("Ingrese su respuesta => "))
+            if opcion in valores:
+                if opcion == 1:
+                    return True
+                else:
+                    return False
+            else:
+                print("Ingrese una opcion valida")
+        except:
+            print("Ingresar un caracter valido")
+
+
+=======
+        return False  # Return False on error or handle as needed
+>>>>>>> 2666b36672ba67487959d2f67c698dc59bbe8c26
