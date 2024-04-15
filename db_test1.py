@@ -150,11 +150,7 @@ def db_register(
             print("Empleado registrado exitosamente.")
         except (Exception, psycopg2.Error) as error:
             print("Error al registrar el empleado:", error)
-        finally:
-            # Close the database connection
-            if connection:
-                cursor.close()
-                connection.close()
+        
 
         return None
 
