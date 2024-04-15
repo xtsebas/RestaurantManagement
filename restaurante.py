@@ -336,6 +336,20 @@ def restaurante(database):
 
 
 #Flujo de sign in/ log in
+def login(tupla, contrasena):
+    longitud = len(tupla)
+    i = 2
+    while i<longitud:
+        hash_bd = tupla[i]
+        hash_bd_bytes = bytes.fromhex(hash_bd[2:]) 
+
+        salt = hash_bd_bytes[:29]  
+        hash_contraseña = hash_bd_bytes[29:]  
+
+        if bcrypt.checkpw(contrasena.encode('utf-8'), salt + hash_contraseña):
+            return True
+        i+=2
+    return False
 
 database = conectar_bd()
 
@@ -348,8 +362,8 @@ while True:
     if accion == "1":
         usuario = str(input("Ingrese su usuario ---> "))
         contrasena = str(input("Ingrese su contraseña ---> "))
-        user = db_signin(connection=database, usuario=usuario, contrasena=contrasena )
-        if len(user) > 0:
+        user = db_signin(connection=database, usuario=usuario)
+        if login(user, contrasena):
             current_user = user
             user = []
             os.system('cls' if os.name == 'nt' else 'clear')

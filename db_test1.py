@@ -159,14 +159,14 @@ def db_register(
         return None
 
 #sign in con verificacion de usuario
-def db_signin(connection, usuario, contrasena):
+def db_signin(connection, usuario):
     cursor = connection.cursor()
     query = """
         SELECT * FROM empleado
-        WHERE nombre_empleado = %s AND contrasena_hash = %s
+        WHERE nombre_empleado = %s
     """
     try:
-        cursor.execute(query, (usuario, contrasena))
+        cursor.execute(query, (usuario,))
         rows = cursor.fetchall()
         return sum(rows, ())
     except Exception as e:
