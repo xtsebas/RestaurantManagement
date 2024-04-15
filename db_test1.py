@@ -188,6 +188,7 @@ def validacion_mesa(no_mesa, area_id, connection, option, id_empleado):
         return None
     
     estado = result[2]
+    unida = result[3]
     
     if option == 1:
         if estado:
@@ -660,3 +661,43 @@ def eficiencia_meseros(connection):
     except (Exception, psycopg2.Error) as error:
         print("Error al obtener el reporte:", error)
         return []
+    
+"""
+Une las mesas y abre la cuenta asociada a la primera mesa
+"""
+def unir_mesas(connection, id_empleado, no_mesa1, no_mesa2, id_area):
+    cursor = connection.cursor()
+
+    try:
+        # Insertar en cuenta y obtener el id_cuenta generado
+        cuenta = """
+            INSERT INTO cuenta (no_mesa, empleado_asociado, estado, hora_entrada)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP) RETURNING id_cuenta;
+        """
+        cursor.execute(cuenta, (no_mesa1, id_empleado, 'activa'))
+        id_cuenta = cursor.fetchone()[0]  # Obtiene el id_cuenta generado
+        connection.commit()
+
+        # Uniendo mesas
+        query = """
+            INSERT INTO mesas_unidas (id_cuenta, no_mesa1, no_mesa2, id_area) 
+            VALUES (%s, %s, %s, %s);
+        """
+        cursor.execute(query, (id_cuenta, no_mesa1, no_mesa2, id_area))
+        connection.commit()  # Asegura que los cambios se guarden
+        print("Mesas unidas con éxito y cuenta abierta.")
+        print("Cuenta abierta asociada amla mesa "+no_mesa1)
+        cursor.close()
+        return "Mesas unidas con éxito y cuenta abierta."
+    
+    except (Exception, psycopg2.Error) as error:
+        # En caso de error, imprime el error y hace rollback de la transacción
+        connection.rollback()
+        cursor.close()
+        print("Error al unir mesas o abrir cuenta:", error)
+        return None
+
+# Suponiendo que ya tienes una conexión creada, llamada `conn`, usarías la función así:
+# resultado = unir_mesas(conn, id_empleado=1, no_mesa1=10, no_mesa2=20, id_area=3)
+# print(resultado)
+

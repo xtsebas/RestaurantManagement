@@ -134,6 +134,29 @@ def accionMesa(area,connection):
         print("Regresando")
         time.sleep(3)
         restaurante(connection)
+    
+#Fujo para juntar mesas
+def juntar_mesas(connection):
+    print("======================")
+    print("Menu de junta de mesas")
+    print("======================")
+    print("Mostrando areas")
+    pantalla_area = obtener_areas(database)
+    headers = ["ID", "Nombre", "Tipo"]
+    print(tabulate(pantalla_area, headers=headers))
+    area = str(input("\nIngrese el id del area: "))
+    pantalla_mesas = obtener_mesas(database, area)
+    if pantalla_mesas == []:
+        print("Area inexistente")
+    else:
+        pantalla_mesas = obtener_mesas(database, area)
+        headers = ["Numero de mesa", "Capacidad", "Estado", "Esta Unida"]
+        print(tabulate(pantalla_mesas, headers=headers))
+
+        no_mesa1 = str(input("Ingrese el numero de la mesa 1 => "))
+        no_mesa2 = str(input("Ingrese el numero de la mesa 2 =>"))
+        unir_mesas(connection=connection, id_empleado=current_user[0],no_mesa1=no_mesa1, no_mesa2=no_mesa2,id_area=area)
+
 
 #mostrar mesas
 def mesas(database):
@@ -157,6 +180,7 @@ def mesas(database):
             accionMesa(area=area, connection=database)
 
     elif opcion=='2':
+        juntar_mesas(connection=database)
         pass
     elif opcion=='3':
         ingresar_queja(database)
